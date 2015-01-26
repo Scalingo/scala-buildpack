@@ -1,7 +1,7 @@
-Heroku buildpack: Scala [![Build Status](https://travis-ci.org/heroku/heroku-buildpack-scala.svg?branch=master)](https://travis-ci.org/heroku/heroku-buildpack-scala)
-=========================
+Buildpack: Scala
+================
 
-This is a [Heroku buildpack](http://devcenter.heroku.com/articles/buildpacks) for Scala apps.
+This is a [Buildpack](http://doc.scalingo.com/buildpacks) for Scala apps.
 It uses [sbt](https://github.com/harrah/xsbt/) 0.11.0+.
 
 Usage
@@ -12,16 +12,15 @@ Example usage:
     $ ls
     Procfile build.sbt project src
 
-    $ heroku create --buildpack https://github.com/heroku/heroku-buildpack-scala.git
+    $ scalingo create scala-app
 
-    $ git push heroku master
+    $ git push scalingo master
     ...
-    -----> Heroku receiving push
     -----> Scala app detected
     -----> Building app with sbt
     -----> Running: sbt compile stage
 
-The buildpack will detect your app as Scala if it has the project/build.properties and either .sbt or .scala based build config.  It vendors a version of sbt and your popluated .ivy/cache into your slug.  The .ivy2 directory will be cached between builds to allow for faster build times.
+The buildpack will detect your app as Scala if it has the project/build.properties and either .sbt or .scala based build config.  It vendors a version of sbt and your popluated .ivy/cache into your container.  The .ivy2 directory will be cached between builds to allow for faster build times.
 
 Clean builds
 ------------
@@ -29,16 +28,15 @@ Clean builds
 In some cases, builds need to clean artifacts before compiling. If a clean build is necessary, configure builds to perform clean by setting `SBT_CLEAN=true`:
 
 ```sh-session
-$ heroku config:set SBT_CLEAN=true
-Setting config vars and restarting example-app... done, v17
-SBT_CLEAN: true
+$ scalingo env-set SBT_CLEAN=true
+SBT_CLEAN has been set to true.
 ```
 
 All subsequent deploys will use the clean task. To remove the clean task, unset `SBT_CLEAN`:
 
 ```sh-session
-$ heroku config:unset SBT_CLEAN
-Unsetting SBT_CLEAN and restarting example-app... done, v18
+$ scalingo env-unset SBT_CLEAN
+SBT_CLEAN has been unset.
 ```
 
 Hacking
@@ -46,23 +44,23 @@ Hacking
 
 To use this buildpack, fork it on Github.  Push up changes to your fork, then create a test app with `--buildpack <your-github-url>` and push to it.
 
-For example, to reduce your slug size by not including the .ivy2/cache, you could add the following.
+For example, to reduce your container size by not including the .ivy2/cache, you could add the following.
 
     for DIR in $CACHED_DIRS ; do
     rm -rf $CACHE_DIR/$DIR
     mkdir -p $CACHE_DIR/$DIR
     cp -r $DIR/.  $CACHE_DIR/$DIR
     # The following 2 lines are what you would add
-    echo "-----> Dropping ivy cache from the slug"
+    echo "-----> Dropping ivy cache from the container"
     rm -rf $SBT_USER_HOME/.ivy2
 
-Note: You will need to have your build copy the necessary jars to run your application to a place that will remain included with the slug.
+Note: You will need to have your build copy the necessary jars to run your application to a place that will remain included with the container.
 
 
 Commit and push the changes to your buildpack to your Github fork, then push your sample app to Heroku to test.  You should see:
 
     ...
-    -----> Dropping ivy cache from the slug
+    -----> Dropping ivy cache from the container
 
 License
 -------
