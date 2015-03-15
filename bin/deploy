@@ -21,11 +21,10 @@ excluded_files=(
   'cf_spec/'
   'log/'
   'test/'
-  'bin/package'
-  'buildpack-packager/'
+  'bin/deploy'
+  'buildpack-deployer/'
 )
 
 BIN="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-source $BIN/../buildpack-packager/lib/packager
-
-package_buildpack $@
+source $BIN/../buildpack-deployer/lib/deployer
+deploy_buildpack $@
