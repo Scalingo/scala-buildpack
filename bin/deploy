@@ -15,7 +15,7 @@ dependencies=(
 )
 
 excluded_files=(
-  '.git/'
+  '.git'
   '.gitignore'
   '.gitmodules'
   'cf_spec/'
