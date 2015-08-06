@@ -3,10 +3,11 @@
 language='scala'
 
 dependencies=(
-  'http://lang-jvm.s3.amazonaws.com/jvm-buildpack-common-v10.tar.gz'
+  'https://codon-buildpacks.s3.amazonaws.com/buildpacks/heroku/jvm-common.tgz'
+  'https://s3.amazonaws.com/heroku-jvm-langpack-java/buildpack-jvm-utils-0.1.jar'
   'http://lang-jvm.s3.amazonaws.com/jdk/cedar-14/openjdk1.9-latest.tar.gz'
-  'http://lang-jvm.s3.amazonaws.com/jdk/openjdk1.8.0_20-slim-cedar14-v2.tar.gz'
-  'http://lang-jvm.s3.amazonaws.com/jdk/openjdk1.7.0_55-cedar14-v2.tar.gz'
+  'http://lang-jvm.s3.amazonaws.com/jdk/openjdk1.8.0_51-cedar14.tar.gz'
+  'http://lang-jvm.s3.amazonaws.com/jdk/openjdk1.7.0_79-cedar14.tar.gz'
   'http://lang-jvm.s3.amazonaws.com/jdk/openjdk1.6.0_27.tar.gz'
   'http://lang-jvm.s3.amazonaws.com/sbt/v2/sbt-cache-base.tar.gz'
   'http://lang-jvm.s3.amazonaws.com/sbt/v2/sbt-cache-play-2.3_2.10.tar.gz'
