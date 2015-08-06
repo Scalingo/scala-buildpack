@@ -333,12 +333,10 @@ run_sbt()
   if [ "${PIPESTATUS[*]}" != "0 0" ]; then
     error "Failed to run sbt!
 We're sorry this build is failing! If you can't find the issue in application
-code, please submit a ticket so we can help: https://help.heroku.com
-You can also try reverting to the previous version of the buildpack by running:
-$ heroku buildpacks:set https://github.com/heroku/heroku-buildpack-scala#previous-version
+code, please send us an email at support@scalingo.com.
 
 Thanks,
-Heroku"
+Scalingo"
   fi
 }
 
