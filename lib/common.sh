@@ -50,6 +50,17 @@ function curl() {
     fi
   else
     $real_curl $curl_args
+
+export_env_dir() {
+  env_dir=$1
+  whitelist_regex=${2:-''}
+  blacklist_regex=${3:-'^(PATH|GIT_DIR|CPATH|CPPATH|LD_PRELOAD|LIBRARY_PATH|JAVA_OPTS)$'}
+  if [ -d "$env_dir" ]; then
+    for e in $(ls $env_dir); do
+      echo "$e" | grep -E "$whitelist_regex" | grep -qvE "$blacklist_regex" &&
+      export "$e=$(cat $env_dir/$e)"
+      :
+    done
   fi
 }
 
@@ -117,7 +128,7 @@ get_scala_version() {
   local playVersion=$4
 
   if [ -n "${playVersion}" ]; then
-    if [ "${playVersion}" = "2.3" ]; then
+    if [ "${playVersion}" = "2.3" ] || [ "${playVersion}" = "2.4" ]; then
       # if we don't grep for the version, and instead use `sbt scala-version`,
       # then sbt will try to download the internet
       scalaVersionLine="$(grep "scalaVersion" "${ctxDir}"/build.sbt | sed -E -e 's/[ \t\r\n]//g')"
@@ -149,7 +160,7 @@ get_supported_play_version() {
 
   if _has_playPluginsFile $ctxDir; then
     pluginVersionLine="$(grep "addSbtPlugin(.\+play.\+sbt-plugin" "${ctxDir}"/project/plugins.sbt | sed -E -e 's/[ \t\r\n]//g')"
-    pluginVersion=$(expr "$pluginVersionLine" : ".\+\(2\.[0-3]\)\.[0-9]")
+    pluginVersion=$(expr "$pluginVersionLine" : ".\+\(2\.[0-4]\)\.[0-9]")
     if [ "$pluginVersion" != 0 ]; then
       echo -n "$pluginVersion"
     fi
@@ -202,7 +213,7 @@ _download_and_unpack_ivy_cache() {
   local scalaVersion=$2
   local playVersion=$3
 
-  baseUrl="http://lang-jvm.s3.amazonaws.com/sbt/v2/sbt-cache"
+  baseUrl="http://lang-jvm.s3.amazonaws.com/sbt/v4/sbt-cache"
   if [ -n "$playVersion" ]; then
     ivyCacheUrl="$baseUrl-play-${playVersion}_${scalaVersion}.tar.gz"
   else
@@ -223,6 +234,14 @@ has_supported_sbt_version() {
   local ctxDir=$1
   local supportedVersion="$(get_supported_sbt_version ${ctxDir})"
   if [ "$supportedVersion" != "" ] ; then
+    return 0
+  else
+    return 1
+  fi
+}
+
+has_old_preset_sbt_opts() {
+  if [ "$SBT_OPTS" = "-Xmx384m -Xss512k -XX:+UseCompressedOops" ]; then
     return 0
   else
     return 1
@@ -279,32 +298,45 @@ universal_packaging_default_web_proc() {
 
 run_sbt()
 {
-  local home=$1
-  local launcher=$2
-  local tasks=$3
+  local javaVersion=$1
+  local home=$2
+  local launcher=$3
+  local tasks=$4
 
-  #if [ ${maxSbtHeap:-""} == "" ]; then
-    case $(ulimit -u) in
-    32768) # PX Dyno
-      maxSbtHeap=6144
-      ;;
-    *)     # 2X Dyno
-      maxSbtHeap=1024
-      ;;
-    esac
-  #fi
-
-  JAVA_OPTS="-Xms768M -Xmx${maxSbtHeap}M -Xss4M -XX:MaxPermSize=512M -XX:+CMSClassUnloadingEnabled"
-  JAVA_OPTS="$JAVA_OPTS -Dfile.encoding=UTF8 -Dsbt.log.noformat=true"
-  JAVA_OPTS="$JAVA_OPTS -Duser.home=$home"
-  JAVA_OPTS="$JAVA_OPTS -Divy.default.ivy.user.dir=$home/.ivy2"
-  JAVA_OPTS="$JAVA_OPTS -Dsbt.global.base=$home"
+  case $(ulimit -u) in
+  32768) # PX Dyno
+    maxSbtHeap=5220
+    ;;
+  *)     # 2X Dyno
+    maxSbtHeap=768
+    ;;
+  esac
 
   status "Running: sbt $tasks"
-  HOME="$home" java $JAVA_OPTS -jar $launcher $tasks < /dev/null 2>&1 | sed -u 's/^/       /'
+  HOME="$home" sbt ${SBT_EXTRAS_OPTS} \
+    -J-Xmx${maxSbtHeap}M \
+    -J-Xms${maxSbtHeap}M \
+    -J-XX:+UseCompressedOops \
+    -sbt-dir $home \
+    -ivy $home/.ivy2 \
+    -sbt-launch-dir $home/launchers \
+    -Duser.home=$home \
+    -Divy.default.ivy.user.dir=$home/.ivy2 \
+    -Dfile.encoding=UTF8 \
+    -Dsbt.global.base=$home \
+    -Dsbt.log.noformat=true \
+    -no-colors -batch \
+    $tasks < /dev/null 2>&1 | indent
 
   if [ "${PIPESTATUS[*]}" != "0 0" ]; then
-    error "Failed to run sbt task: $tasks"
+    error "Failed to run sbt!
+We're sorry this build is failing! If you can't find the issue in application
+code, please submit a ticket so we can help: https://help.heroku.com
+You can also try reverting to the previous version of the buildpack by running:
+$ heroku buildpacks:set https://github.com/heroku/heroku-buildpack-scala#previous-version
+
+Thanks,
+Heroku"
   fi
 }
 

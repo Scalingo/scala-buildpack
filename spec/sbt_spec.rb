@@ -3,7 +3,6 @@ require_relative 'spec_helper'
 describe "Sbt" do
   it "should not download pre-cached dependencies" do
     Hatchet::Runner.new("sbt-minimal-scala-sample").deploy do |app|
-      expect(app.output).to include("Running: sbt update")
       expect(app.output).to include("Running: sbt compile stage")
       expect(app.output).to include("Priming Ivy cache")
       expect(app.output).not_to include("downloading http://repo.typesafe.com/typesafe/ivy-releases/org.scala-sbt/sbt")
@@ -19,7 +18,7 @@ describe "Sbt" do
 
   it "should run sbt-clean" do
     app = Hatchet::Runner.new("sbt-minimal-scala-sample")
-    app.setup!
+    init_app(app)
     app.set_config("SBT_CLEAN" => "true")
 
     app.deploy do |app|

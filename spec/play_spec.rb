@@ -17,10 +17,8 @@ describe "Play" do
     context repo do
       it "should not download pre-cached dependencies" do
         app = Hatchet::Runner.new(repo)
-        app.setup!
-        app.heroku.put_stack(app.name, "cedar-14")
+        init_app(app)
         app.deploy do |app|
-          expect(app.output).to match("Running: sbt update")
           expect(app.output).to match("Running: sbt compile stage")
           expect(app.output).to match(/Priming Ivy cache \(Scala-2\.[0-9]{1,2}, Play-#{REPOS[repo]}\)/)
           #expect(app.output).not_to match("downloading http://repo.typesafe.com/typesafe/ivy-releases/org.scala-sbt/sbt")

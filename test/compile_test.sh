@@ -2,8 +2,7 @@
 
 . ${BUILDPACK_TEST_RUNNER_HOME}/lib/test_utils.sh
 
-DEFAULT_SBT_VERSION="0.13.6"
-DEFAULT_SBT_JAR="sbt-launch-0.13.6.jar"
+DEFAULT_SBT_VERSION="0.13.7"
 DEFAULT_PLAY_VERSION="2.3.4"
 DEFAULT_SCALA_VERSION="2.11.1"
 SBT_TEST_CACHE="/tmp/sbt-test-cache"
@@ -131,10 +130,12 @@ testCompile()
  # setup
   assertTrue "Ivy2 cache should have been repacked." "[ -d ${BUILD_DIR}/.sbt_home/.ivy2 ]"
   assertTrue "SBT bin cache should have been unpacked" "[ -f ${BUILD_DIR}/.sbt_home/bin/testfile ]"
-  assertTrue "Ivy2 cache should exist" "[ -d ${BUILD_DIR}/.ivy2/cache ]"
   assertFalse "Old SBT launch jar should have been deleted" "[ -f ${BUILD_DIR}/.sbt_home/bin/sbt-launch-OLD.jar ]"
   assertTrue "sbt launch script should be created" "[ -f ${BUILD_DIR}/.sbt_home/bin/sbt ]"
-  assertCaptured "SBT should have been installed" "Downloading SBT"
+  assertTrue "sbt plugins dir should exist" "[ -d ${BUILD_DIR}/.sbt_home/plugins ]"
+  assertTrue "sbt plugins should be compiled" "[ -d ${BUILD_DIR}/.sbt_home/plugins/target ]"
+  assertTrue "sbt launcher should be installed" "[ -f ${BUILD_DIR}/.sbt_home/launchers/${DEFAULT_SBT_VERSION}/sbt-launch.jar ]"
+  assertCaptured "SBT should have been installed" "Downloading sbt launcher for $DEFAULT_SBT_VERSION"
 
   # run
   assertCaptured "SBT tasks to run should be output" "Running: sbt compile stage"
@@ -166,6 +167,19 @@ testCleanCompile()
 
   assertCapturedSuccess
   assertCaptured "SBT tasks to run should still be outputed" "Running: sbt clean compile stage"
+}
+
+testRemovePlayForkRun()
+{
+  createPlayProject
+  mkdir -p ${BUILD_DIR}/project
+  touch ${BUILD_DIR}/project/play-fork-run.sbt
+
+  compile
+
+  assertCapturedSuccess
+  #assertCaptured "Warns about play-fork-run removal" "Removing project/play-fork-run.sbt."
+  assertFalse "Removes play-fork-run" "[ -f ${BUILD_DIR}/project/play-fork-run.sbt ]"
 }
 
 testCompile_PrimeIvyCacheForPlay() {
@@ -208,7 +222,7 @@ testCompile_WithNonDefaultVersion()
 
   assertCapturedSuccess
   assertCaptured "Should install JDK 1.6" "Installing OpenJDK 1.6"
-  assertCaptured "Default version of SBT should always be installed" "Downloading SBT"
+  assertCaptured "SBT should be installed" "Downloading sbt launcher for 0.11.1"
   assertCaptured "Specified SBT version should actually be used" "Getting org.scala-tools.sbt sbt_2.9.1 ${specifiedSbtVersion}"
 
   unset STACK
@@ -218,12 +232,14 @@ testCompile_WithMultilineBuildProperties() {
   createSbtProject
   mkdir -p ${BUILD_DIR}/project
   cat > ${BUILD_DIR}/project/build.properties <<EOF
-sbt.version   =  0.11.3
+foo=bar
+
+sbt.version   =  0.13.5
 
 abc=xyz
 EOF
   compile
-  assertCaptured "Multiline properties file should detect sbt version" "Downloading SBT"
+  assertCaptured "Multiline properties file should detect sbt version" "Downloading sbt launcher for 0.13.5"
 }
 
 testCompile_BuildFailure()
@@ -237,7 +253,7 @@ EOF
 
   compile
 
-  assertCapturedError "Failed to run sbt task"
+  assertCapturedError "Failed to run sbt!"
 }
 
 testCompile_NoStageTask()
@@ -248,7 +264,7 @@ testCompile_NoStageTask()
   compile
 
   assertCapturedError "Not a valid key: stage"
-  assertCapturedError "Failed to run sbt task"
+  assertCapturedError "Failed to run sbt!"
 }
 
 testComplile_NoBuildPropertiesFile()
@@ -278,7 +294,7 @@ testComplile_BuildPropertiesFileWithRCVersion()
 
   compile
 
-  assertCaptured "Multiline properties file should detect sbt version" "Downloading SBT"
+  assertCaptured "SBT should have been installed" "Downloading sbt launcher for"
 }
 
 testComplile_BuildPropertiesFileWithMServerVersion()
@@ -287,5 +303,5 @@ testComplile_BuildPropertiesFileWithMServerVersion()
 
   compile
 
-  assertCaptured "Multiline properties file should detect sbt version" "Downloading SBT"
+  assertCaptured "SBT should have been installed" "Downloading sbt launcher for"
 }
