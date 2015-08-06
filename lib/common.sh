@@ -50,6 +50,8 @@ function curl() {
     fi
   else
     $real_curl $curl_args
+  fi
+}
 
 export_env_dir() {
   env_dir=$1
