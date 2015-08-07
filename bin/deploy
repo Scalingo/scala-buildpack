@@ -9,10 +9,11 @@ dependencies=(
   'http://lang-jvm.s3.amazonaws.com/jdk/openjdk1.8.0_51-cedar14.tar.gz'
   'http://lang-jvm.s3.amazonaws.com/jdk/openjdk1.7.0_79-cedar14.tar.gz'
   'http://lang-jvm.s3.amazonaws.com/jdk/openjdk1.6.0_27.tar.gz'
-  'http://lang-jvm.s3.amazonaws.com/sbt/v2/sbt-cache-base.tar.gz'
-  'http://lang-jvm.s3.amazonaws.com/sbt/v2/sbt-cache-play-2.3_2.10.tar.gz'
-  'http://lang-jvm.s3.amazonaws.com/sbt/v2/sbt-cache-play-2.2_2.10.tar.gz'
-  'http://lang-jvm.s3.amazonaws.com/sbt/v2/sbt-cache-play-2.1_2.10.tar.gz'
+  'http://lang-jvm.s3.amazonaws.com/sbt/v4/sbt-cache-base.tar.gz'
+  'http://lang-jvm.s3.amazonaws.com/sbt/v4/sbt-cache-play-2.4_2.11.tar.gz'
+  'http://lang-jvm.s3.amazonaws.com/sbt/v4/sbt-cache-play-2.3_2.11.tar.gz'
+  'http://lang-jvm.s3.amazonaws.com/sbt/v4/sbt-cache-play-2.2_2.10.tar.gz'
+  'http://lang-jvm.s3.amazonaws.com/sbt/v4/sbt-cache-play-2.1_2.10.tar.gz'
 )
 
 excluded_files=(
