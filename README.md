@@ -2,7 +2,7 @@ Buildpack: Scala
 ================
 
 This is a [Buildpack](http://doc.scalingo.com/buildpacks) for Scala apps.
-It uses [sbt](https://github.com/harrah/xsbt/) 0.11.0+.
+It uses [sbt](https://github.com/sbt/sbt) 0.11.0+.
 
 How it works
 -----
