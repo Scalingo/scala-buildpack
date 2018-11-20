@@ -42,6 +42,10 @@ export GEM_PATH=$(echo "$GEM_PATH" | sed -e s/$escAppBuildDir/$escBuildDir/g)
 
 export_env $ENV_DIR "." "JAVA_OPTS"
 
+if [ "$STACK" = "scalingo" ] ; then
+  export STACK="cedar-14"
+fi
+
 # Set system properties as env vars
 SYSPROPFILE="$BUILD_DIR/system.properties"
 
