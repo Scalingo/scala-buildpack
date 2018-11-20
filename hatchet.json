@@ -3,6 +3,8 @@
     "directory": "spec/fixtures"
   },
   "play": [
+    "heroku/scala-getting-started",
+    "kissaten/play-2.4.x-scala",
     "kissaten/play-2.3.x-scala-sample",
     "kissaten/play-2.2.x-scala-sample",
     "kissaten/play-2.1.x-scala-sample",
@@ -14,9 +16,7 @@
   ],
   "sbt": [
     "kissaten/sbt-minimal-scala-sample",
-    "kissaten/sbt-start-script-sample"
-  ],
-  "lift": [
-    "kissaten/lift-2.5-sample"
+    "kissaten/sbt-start-script-sample",
+    "kissaten/sbt-one-example"
   ]
 }

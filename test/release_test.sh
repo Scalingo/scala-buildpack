@@ -6,10 +6,8 @@ testRelease()
 {
   expected_release_output=`cat <<EOF
 ---
-config_vars:
-  JAVA_OPTS: -Xss512k -XX:+UseCompressedOops
 addons:
-  heroku-postgresql:hobby-dev
+  - heroku-postgresql
 
 EOF`
 
@@ -26,10 +24,8 @@ testPlay20Release()
 
   expected_release_output=`cat <<EOF
 ---
-config_vars:
-  JAVA_OPTS: -Xss512k -XX:+UseCompressedOops
 addons:
-  heroku-postgresql:hobby-dev
+  - heroku-postgresql
 
 default_process_types:
   web: target/start -Dhttp.port=\\$PORT \\$JAVA_OPTS

@@ -170,6 +170,19 @@ EOF
   assertCapturedEquals "0.12.0"
 }
 
+testGetSupportedSbt1Version()
+{
+  mkdir -p ${BUILD_DIR}/project
+  cat > ${BUILD_DIR}/project/build.properties <<EOF
+sbt.version=1.0.0-RC3
+EOF
+
+  capture get_supported_sbt_version ${BUILD_DIR} ${SBT_1_VERSION_PATTERN}
+
+  assertCapturedSuccess
+  assertCapturedEquals "1.0.0-RC3"
+}
+
 testGetUnsupportedSbtVersion()
 {
   mkdir -p ${BUILD_DIR}/project
@@ -393,6 +406,19 @@ testDetectPlayLang_BadDir() {
   capture detect_play_lang non_existant_dir
   assertCapturedSuccess
   assertCapturedEquals ""
+}
+
+testGetSupportedPlayVersion_24() {
+  mkdir -p ${BUILD_DIR}/conf ${BUILD_DIR}/project
+  touch ${BUILD_DIR}/conf/application.conf
+  cat > ${BUILD_DIR}/project/plugins.sbt <<EOF
+addSbtPlugin("com.typesafe.play" % "sbt-plugin" % "2.4.2")
+EOF
+
+  capture get_supported_play_version ${BUILD_DIR}
+
+  assertCapturedSuccess
+  assertCapturedEquals "2.4"
 }
 
 testGetSupportedPlayVersion_23() {

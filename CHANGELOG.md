@@ -1,16 +1,40 @@
-v1.2.0 Aug 6, 2015
-==================
+## v82
 
-* Update from upstream
+* Changed location of JVM common buildpack
 
-v1.1.0 Mar 15, 2015
-====================
+## v80
 
-* Use buildpack-deployer instead of buildpack-packager
+* Clean up coursier cache directory after sbt build
 
-# Upstream chanlog
+## v79
 
-## Master
+* Fixed a bug related to sbt 1.0 and the HerokuBuildpackPlugin
+
+## v69
+
+* Fixed a bug in system.properties detection
+
+## v68
+
+* Removed default JAVA_OPTS from bin/release
+* Added support for sbt.project config
+
+## v66
+
+* Added support for SBT 0.13.11
+
+## v63
+
+* Added detection for specific failure cases and advised solutions in message.
+
+## v62
+
+* Updated sbt cache primer to include Play 2.4.3
+
+## v61
+
+* Added SBT_PRE_TASKS config var support
+* Upgrade SBT launcher version to 0.13.9
 
 ## v60
 
