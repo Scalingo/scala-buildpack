@@ -296,7 +296,7 @@ run_sbt() {
   local home=$2
   local launcher=$3
   local tasks=$4
-  local buildLogFile=".heroku/sbt-build.log"
+  local buildLogFile=".scalingo/sbt-build.log"
 
   echo "" > $buildLogFile
 
