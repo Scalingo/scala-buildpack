@@ -1,12 +1,9 @@
-Buildpack: Scala
-================
+# Buildpack: Scala
 
 This is a [Buildpack](http://doc.scalingo.com/buildpacks) for Scala apps.
 It uses [sbt](https://github.com/sbt/sbt) 0.11.0+.
 
-
-How it works
------
+## How it works
 
 The buildpack will detect your app as Scala if it has a `project/build.properties` file and either a `.sbt` or `.scala` based build config (for example, a `build.sbt` file).  It vendors a version of sbt into your slug (if you are not using sbt-native-packager, it also includes your popluated `.ivy/cache` in the slug).  The `.ivy2` directory will be cached between builds to allow for faster build times.
 
@@ -22,15 +19,13 @@ It is strongly recommended that you use sbt-native-packager with this buildpack 
 
 The buildpack will detect your app as Scala if it has the project/build.properties and either .sbt or .scala based build config.  It vendors a version of sbt and your popluated .ivy/cache into your container.  The .ivy2 directory will be cached between builds to allow for faster build times.
 
-Documentation
-------------
+## Documentation
 
 For more information about using Scala and buildpacks on Scalingo, see these articles:
 
 *  [Scalingo's Scala Support](http://doc.scalingo.com/languages/scala)
 
-Customizing
------------
+## Customizing
 
 This buildpack uses [sbt-extras](https://github.com/paulp/sbt-extras) to run sbt.
 In this way, the execution of sbt can be customized either by setting
@@ -43,8 +38,7 @@ the compile process would look like this:
 $ scalingo env-set SBT_OPTS="-J-Xss4m"
 ```
 
-Running additional tasks before the build
-----------------
+## Running additional tasks before the build
 
 Sometimes, it might be necessary to run additional sbt tasks before a build and deployment (for example, database migrations). Ideally, the tasks should be interdependent such that these tasks run automatically as pre-requisities to `compile stage`, but sometimes this might not be the case. To add any additional tasks, set the environment variable `SBT_PRE_TASKS` to a list of tasks that should be executed. If the following is set:
 
@@ -54,8 +48,7 @@ Then, the following command will be run for build:
 
     sbt flyway:migrate info compile stage
 
-Clean builds
-------------
+## Clean builds
 
 In some cases, builds need to clean artifacts before compiling. If a clean build is necessary, configure builds to perform clean by setting `SBT_CLEAN=true`:
 
@@ -71,8 +64,7 @@ $ scalingo env-unset SBT_CLEAN
 SBT_CLEAN has been unset.
 ```
 
-Development
--------
+## Development
 
 To use this buildpack, fork it on Github.  Push up changes to your fork, then create a test app with `--buildpack <your-github-url>` and push to it.
 

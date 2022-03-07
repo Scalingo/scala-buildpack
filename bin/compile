@@ -6,6 +6,7 @@ set -e
 
 BPLOG_PREFIX="buildpack.scala"
 
+BASE_DIR="$(pwd)"
 BP_DIR=$(cd $(dirname $0)/..; pwd) # absolute path
 BIN_DIR=$BP_DIR/bin
 OPT_DIR=$BP_DIR/opt
@@ -21,24 +22,28 @@ ENV_DIR=$3
 
 source <(curl --retry 3 -fsSL $BUILDPACK_STDLIB_URL)
 
-# Move app to a static build dir to keep paths the same between builds
-# This is necessary for incremental compile, because sbt invalidates the
-# cache if the path is different.
-if is_app_dir "$APP_BUILD_DIR"; then
-  BUILD_DIR="/tmp/scala_buildpack_build_dir"
-  mv $APP_BUILD_DIR $BUILD_DIR
+if [ -z "${CNB_STACK_ID:-}" ]; then
+  # Move app to a static build dir to keep paths the same between builds
+  # This is necessary for incremental compile, because sbt invalidates the
+  # cache if the path is different.
+  if is_app_dir "$APP_BUILD_DIR"; then
+    BUILD_DIR="/tmp/scala_buildpack_build_dir"
+    mv $APP_BUILD_DIR $BUILD_DIR
+  else
+    BUILD_DIR="$APP_BUILD_DIR"
+  fi
+
+  # Now that we've moved into a new tmp dir, we need to fix the PATH
+  # This is only necessary when using heroku-buildpack-multi because earlier
+  # buildpacks may have put extra commands (like `grunt`) on the path.
+  sedReplace="sed -e s/[\/&]/\\\&/g"
+  escAppBuildDir="$(echo "$APP_BUILD_DIR" | $sedReplace)"
+  escBuildDir="$(echo "$BUILD_DIR" | $sedReplace)"
+  export PATH=$(echo "$PATH" | sed -e s/$escAppBuildDir/$escBuildDir/g)
+  export GEM_PATH=$(echo "$GEM_PATH" | sed -e s/$escAppBuildDir/$escBuildDir/g)
 else
   BUILD_DIR="$APP_BUILD_DIR"
 fi
-
-# Now that we've moved into a new tmp dir, we need to fix the PATH
-# This is only necessary when using buildpack-multi because earlier
-# buildpacks may have put extra commands (like `grunt`) on the path.
-sedReplace="sed -e s/[\/&]/\\\&/g"
-escAppBuildDir="$(echo "$APP_BUILD_DIR" | $sedReplace)"
-escBuildDir="$(echo "$BUILD_DIR" | $sedReplace)"
-export PATH=$(echo "$PATH" | sed -e s/$escAppBuildDir/$escBuildDir/g)
-export GEM_PATH=$(echo "$GEM_PATH" | sed -e s/$escAppBuildDir/$escBuildDir/g)
 
 export_env $ENV_DIR "." "JAVA_OPTS"
 
@@ -53,7 +58,7 @@ SBT_PRE_TASKS=$(get_property "$SYSPROPFILE" "sbt.pre-tasks" "$SBT_PRE_TASKS")
 SBT_CLEAN=$(get_property "$SYSPROPFILE" "sbt.clean" "${SBT_CLEAN:-false}")
 
 # Install the JDK
-install_jdk $BUILD_DIR
+install_jdk "$BUILD_DIR" "$CACHE_DIR"
 
 #create the cache dir if it doesn't exist
 mkdir -p $CACHE_DIR
@@ -177,6 +182,10 @@ if is_sbt_native_packager $BUILD_DIR || is_play $BUILD_DIR; then
       status "Dropping sbt boot dir from the slug"
       rm -rf $SBT_USER_HOME/boot
     fi
+    if [ -d $SBT_USER_HOME/.cache ] ; then
+      status "Dropping sbt cache dir from the slug"
+      rm -rf $SBT_USER_HOME/.cache
+    fi
     if [ -d $BUILD_DIR/project/boot ] ; then
       status "Dropping project boot dir from the slug"
       rm -rf $BUILD_DIR/project/boot
@@ -201,6 +210,12 @@ export PATH="\$SBT_HOME/bin:\$PATH"
 EOF
 
 # Move compiled app back to where Heroku expects it
-if is_app_dir "$APP_BUILD_DIR"; then
+if [ -z "${CNB_STACK_ID:-}" ] && is_app_dir "$APP_BUILD_DIR"; then
   mv $BUILD_DIR $APP_BUILD_DIR
 fi
+
+# write export script
+cat << EOF > "${BASE_DIR}/export"
+export SBT_HOME="$APP_BUILD_DIR/$SBT_USER_HOME"
+export PATH="\$SBT_HOME/bin:\$PATH"
+EOF
