@@ -1,3 +1,47 @@
+## Main
+
+## v92
+
+* Update sbt-extras, support for sbt >= 1.6.2
+
+## v91
+
+* Download the JVM Common buildpack from the buildpack registry, rather than the legacy `codon-buildpacks` S3 bucket.
+* Remove heroku-16 support
+
+## v90
+
+* Update sbt-extras, support for sbt >= 1.4.8
+
+## v89
+
+* Enable heroku-20 testing
+
+## v88
+
+* Update sbt-extras
+* Update tests
+
+## v87
+
+* Added ability to run as a CNB with a shim
+
+## v86
+
+* Clean sbt cache dir from slug
+
+## v85
+
+* Pass cache to JVM install to cache system.properties file
+
+## v84
+
+* Export sbt command for use by subsequent buildpacks
+
+## v83
+
+* Ensure bash when running sbt-wrapper
+
 ## v82
 
 * Changed location of JVM common buildpack

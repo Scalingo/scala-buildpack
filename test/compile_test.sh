@@ -140,6 +140,7 @@ testCompile()
   # run
   assertCaptured "SBT tasks to run should be output" "Running: sbt compile stage"
   assertCaptured "SBT should run stage task" "${SBT_STAGING_STRING}"
+  assertTrue "system.properties was not cached" "[ -f $CACHE_DIR/system.properties ]"
 
   # clean up
   assertEquals "Ivy2 cache should have been repacked for a non-play project" "" "$(diff -r ${BUILD_DIR}/.sbt_home/.ivy2 ${CACHE_DIR}/.sbt_home/.ivy2)"
@@ -174,7 +175,7 @@ testCleanCompile()
 
 testRemovePlayForkRun()
 {
-  createPlayProject
+  createPlayProject "2.3.10" "0.13.17" "2.10.7"
   mkdir -p ${BUILD_DIR}/project
   touch ${BUILD_DIR}/project/play-fork-run.sbt
 
@@ -184,21 +185,6 @@ testRemovePlayForkRun()
   #assertCaptured "Warns about play-fork-run removal" "Removing project/play-fork-run.sbt."
   assertFalse "Removes play-fork-run" "[ -f ${BUILD_DIR}/project/play-fork-run.sbt ]"
 }
-
-testCompile_PrimeIvyCacheForPlay() {
-  createPlayProject "2.3.7" "0.13.5" "2.11.1"
-
-  compile
-
-  assertEquals 0 "${RETURN}"
-  assertCaptured "Ivy cache should be primed" "Priming Ivy cache (Scala-2.11, Play-2.3)... done"
-
-  compile
-
-  assertEquals 0 "${RETURN}"
-  assertNotCaptured "Ivy cache should not be primed on re-run" "Priming Ivy Cache"
-}
-
 
 testCompile_Play20Project() {
   createSbtProject
@@ -289,4 +275,14 @@ testComplile_BuildPropertiesFileWithMServerVersion()
   compile
 
   assertContains "SBT should have been installed" "Downloading sbt launcher for" "$(cat ${STD_ERR})"
+}
+
+testComplile_CreatesExportScript()
+{
+  createSbtProject
+
+  compile
+
+  assertEquals 0 "${RETURN}"
+  assertTrue "Export script should be created" "[ -f export ]"
 }

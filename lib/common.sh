@@ -320,7 +320,8 @@ cache_copy() {
 }
 
 install_jdk() {
-  local install_dir=${1}
+  local install_dir=${1:?}
+  local cache_dir=${2:?}
 
   let start=$(nowms)
   JVM_COMMON_BUILDPACK=${JVM_COMMON_BUILDPACK:-https://buildpacks-repository.s3.eu-central-1.amazonaws.com/jvm-common.tar.xz}
@@ -332,6 +333,6 @@ install_jdk() {
   mtime "jvm-common.install.time" "${start}"
 
   let start=$(nowms)
-  install_java_with_overlay ${install_dir}
+  install_java_with_overlay "${install_dir}" "${cache_dir}"
   mtime "jvm.install.time" "${start}"
 }
