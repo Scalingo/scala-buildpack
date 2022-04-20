@@ -1,7 +1,7 @@
 version = "1.0.0"
 owner = "etienne@scalingo.com"
 team = "IST"
-description = "Buildpack for Scala and Play2 applications"
+description = "Buildpack for Scala applications"
 languages = ["shell"]
 destination_server = []
 flags = ["buildpack"]
