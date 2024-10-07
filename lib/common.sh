@@ -1,9 +1,7 @@
 #!/usr/bin/env bash
 
-export BUILDPACK_STDLIB_URL="https://lang-common.s3.amazonaws.com/buildpack-stdlib/v7/stdlib.sh"
-
-SBT_0_VERSION_PATTERN='sbt\.version=\(0\.1[1-3]\.[0-9]*\(-[a-zA-Z0-9_]*\)*\)$'
-SBT_1_VERSION_PATTERN='sbt\.version=\(1\.[0-9]*\.[0-9]*\(-[a-zA-Z0-9_]*\)*\)$'
+SBT_0_VERSION_PATTERN='sbt\.version=\(0\.1[1-3]\.[0-9]\+\(-[a-zA-Z0-9_]\+\)*\)$'
+SBT_1_VERSION_PATTERN='sbt\.version=\(1\.[1-9][0-9]*\.[0-9]\+\(-[a-zA-Z0-9_]\+\)*\)$'
 
 ## SBT 0.10 allows either *.sbt in the root dir, or project/*.scala or .sbt/*.scala
 detect_sbt() {
@@ -19,7 +17,20 @@ detect_sbt() {
 }
 
 is_play() {
-  _has_playConfig $1
+  local app_dir=$1
+
+  case "${IS_PLAY_APP}" in
+  "true")
+    return 0
+    ;;
+  "false")
+    return 1
+    ;;
+  *)
+    [[ -f "${app_dir}/${PLAY_CONF_FILE:-conf/application.conf}" ]] ||
+      grep -E --quiet --no-messages '^\s*addSbtPlugin\(\s*("org\.playframework"|"com\.typesafe\.play")\s*%\s*"sbt-plugin"' "${app_dir}/project/plugins.sbt"
+    ;;
+  esac
 }
 
 is_sbt_native_packager() {
@@ -50,22 +61,6 @@ _has_hiddenSbtDir() {
 _has_buildPropertiesFile() {
   local ctxDir=$1
   test -e $ctxDir/project/build.properties
-}
-
-_has_playConfig() {
-  local ctxDir=$1
-  test -e $ctxDir/conf/application.conf ||
-      test "$IS_PLAY_APP" = "true" ||
-      (test -n "$PLAY_CONF_FILE" &&
-          test -e "$PLAY_CONF_FILE" &&
-          test "$IS_PLAY_APP" != "false") ||
-      (# test for default Play 2.3 and 2.4 setup.
-          test -d $ctxDir/project &&
-          test -r $ctxDir/project/plugins.sbt &&
-          test -n "$(grep "addSbtPlugin(\"com.typesafe.play\" % \"sbt-plugin\"" $ctxDir/project/plugins.sbt | grep -v ".*//.*addSbtPlugin")" &&
-          test -r $ctxDir/build.sbt &&
-          test -n "$(grep "enablePlugins(Play" $ctxDir/build.sbt | grep -v ".*//.*enablePlugins(Play")" &&
-          test "$IS_PLAY_APP" != "false")
 }
 
 _has_playPluginsFile() {
@@ -166,14 +161,14 @@ _download_and_unpack_ivy_cache() {
   local scalaVersion=$2
   local playVersion=$3
 
-  baseUrl="https://lang-jvm.s3.amazonaws.com/sbt/v8/sbt-cache"
+  baseUrl="https://lang-jvm.s3.us-east-1.amazonaws.com/sbt/v8/sbt-cache"
   if [ -n "$playVersion" ]; then
     ivyCacheUrl="$baseUrl-play-${playVersion}_${scalaVersion}.tar.gz"
   else
     ivyCacheUrl="$baseUrl-base.tar.gz"
   fi
 
-  curl --retry 3 --silent --max-time 60 --location $ivyCacheUrl | tar xzm -C $sbtUserHome
+  curl --fail --retry 3 --retry-connrefused --connect-timeout 5 --silent --max-time 60 --location $ivyCacheUrl | tar xzm -C $sbtUserHome
   if [ $? -eq 0 ]; then
     mv $sbtUserHome/.sbt/* $sbtUserHome
     rm -rf $sbtUserHome/.sbt
@@ -308,6 +303,14 @@ run_sbt() {
   fi
 }
 
+write_sbt_dependency_classpath_log() {
+  local home=$1
+  local launcher=$2
+
+  status "Collecting dependency information"
+  SBT_HOME="$home" sbt "show dependencyClasspath" | grep -o "Attributed\(.*\)" > .heroku/sbt-dependency-classpath.log
+}
+
 cache_copy() {
   rel_dir=$1
   from_dir=$2
@@ -326,7 +329,7 @@ install_jdk() {
   let start=$(nowms)
   JVM_COMMON_BUILDPACK=${JVM_COMMON_BUILDPACK:-https://buildpacks-repository.s3.eu-central-1.amazonaws.com/jvm-common.tar.xz}
   mkdir -p /tmp/jvm-common
-  curl --retry 3 --silent --location $JVM_COMMON_BUILDPACK | tar --extract --xz --touch -C /tmp/jvm-common --strip-components=1
+  curl --fail --retry 3 --retry-connrefused --connect-timeout 5 --silent --location $JVM_COMMON_BUILDPACK | tar --extract --xz --touch -C /tmp/jvm-common --strip-components=1
   source /tmp/jvm-common/bin/util
   source /tmp/jvm-common/bin/java
   source /tmp/jvm-common/opt/jdbc.sh

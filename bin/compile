@@ -20,7 +20,7 @@ APP_BUILD_DIR=$(cd $1; pwd)
 CACHE_DIR=$2
 ENV_DIR=$3
 
-source <(curl --retry 3 -fsSL $BUILDPACK_STDLIB_URL)
+source $LIB_DIR/buildpack-stdlib-v7.sh
 
 if [ -z "${CNB_STACK_ID:-}" ]; then
   # Move app to a static build dir to keep paths the same between builds
@@ -88,7 +88,7 @@ fi
 
 if ! (has_supported_sbt_version ${BUILD_DIR} || has_supported_sbt_1_version ${BUILD_DIR}); then
   error "You have defined an unsupported sbt.version in project/build.properties
-You must use a version of sbt between 0.11.0 and 1.x"
+For sbt 0.x you must use a version >= 0.11, for sbt 1.x you must use a version >= 1.1"
 fi
 
 if has_old_preset_sbt_opts; then
@@ -160,6 +160,10 @@ fi
 
 # build app
 run_sbt "$javaVersion" "$SBT_USER_HOME_ABSOLUTE" "$SBT_BINDIR/$SBT_JAR" "$SBT_TASKS"
+
+if [ -z "${DISABLE_DEPENDENCY_CLASSPATH_LOG:-}" ]; then
+  write_sbt_dependency_classpath_log "$SBT_USER_HOME_ABSOLUTE" "$SBT_BINDIR/$SBT_JAR" "show dependencyClasspath"
+fi
 
 # repack cache
 mkdir -p $CACHE_DIR
