@@ -308,7 +308,7 @@ write_sbt_dependency_classpath_log() {
   local launcher=$2
 
   status "Collecting dependency information"
-  SBT_HOME="$home" sbt "show dependencyClasspath" | grep -o "Attributed\(.*\)" > .heroku/sbt-dependency-classpath.log
+  SBT_HOME="$home" sbt "show dependencyClasspath" | grep -o "Attributed\(.*\)" > .scalingo/sbt-dependency-classpath.log
 }
 
 cache_copy() {
