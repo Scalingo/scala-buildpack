@@ -326,16 +326,16 @@ install_jdk() {
   local install_dir=${1:?}
   local cache_dir=${2:?}
 
-  let start=$(nowms)
-  JVM_COMMON_BUILDPACK=${JVM_COMMON_BUILDPACK:-https://buildpacks-repository.s3.eu-central-1.amazonaws.com/jvm-common.tar.xz}
-  mkdir -p /tmp/jvm-common
-  curl --fail --retry 3 --retry-connrefused --connect-timeout 5 --silent --location $JVM_COMMON_BUILDPACK | tar --extract --xz --touch -C /tmp/jvm-common --strip-components=1
-  source /tmp/jvm-common/bin/util
-  source /tmp/jvm-common/bin/java
-  source /tmp/jvm-common/opt/jdbc.sh
-  mtime "jvm-common.install.time" "${start}"
+  local buildpack_dir="$( cd "$(dirname "${BASH_SOURCE[0]}")" && cd .. && pwd )"
 
-  let start=$(nowms)
-  install_java_with_overlay "${install_dir}" "${cache_dir}"
-  mtime "jvm.install.time" "${start}"
+  local jvm_common_buildpack_url="${JVM_COMMON_BUILDPACK:-"https://buildpacks-repository.s3.eu-central-1.amazonaws.com/jvm-common.tar.xz"}"
+
+  mkdir -p /tmp/jvm-common
+  curl --silent --fail --retry 3 --retry-connrefused --connect-timeout 5 \
+    --location "${jvm_common_buildpack_url}" \
+    | tar xzm -C /tmp/jvm-common --strip-components=1
+
+  source /tmp/jvm-common/bin/java
+
+  install_openjdk "${BUILD_DIR}" "${buildpack_dir}"
 }
