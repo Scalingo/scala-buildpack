@@ -148,9 +148,9 @@ prime_ivy_cache() {
     fi
     cachePkg="${cachePkg})"
   fi
-  status_pending "Priming Ivy cache${cachePkg}"
+  echo -n "Priming Ivy cache${cachePkg}..."
   if _download_and_unpack_ivy_cache "$sbtUserHome" "$scalaVersion" "$playVersion"; then
-    status_done
+    echo " done"
   else
     echo " no cache found"
   fi
@@ -295,7 +295,7 @@ run_sbt() {
 
   echo "" > $buildLogFile
 
-  status "Running: sbt $tasks"
+  echo "Running: sbt $tasks..."
   SBT_HOME="$home" sbt ${tasks} | output $buildLogFile
 
   if [ "${PIPESTATUS[*]}" != "0 0" ]; then
@@ -307,7 +307,7 @@ write_sbt_dependency_classpath_log() {
   local home=$1
   local launcher=$2
 
-  status "Collecting dependency information"
+  echo "Collecting dependency information..."
   SBT_HOME="$home" sbt "show dependencyClasspath" | grep -o "Attributed\(.*\)" > .scalingo/sbt-dependency-classpath.log
 }
 
