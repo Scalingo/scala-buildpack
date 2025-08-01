@@ -333,7 +333,7 @@ install_jdk() {
   mkdir -p /tmp/jvm-common
   curl --silent --fail --retry 3 --retry-connrefused --connect-timeout 5 \
     --location "${jvm_common_buildpack_url}" \
-    | tar -xm -C /tmp/jvm-common --strip-components=1
+    | tar --extract --touch --directory="/tmp/jvm-common" --strip-components=1
 
   source /tmp/jvm-common/bin/java
 
