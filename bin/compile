@@ -4,6 +4,10 @@
 # fail fast
 set -e
 
+if [ -n "${BUILDPACK_DEBUG}" ]; then
+  set -o xtrace
+fi
+
 BPLOG_PREFIX="buildpack.scala"
 
 BASE_DIR="$(pwd)"
@@ -175,27 +179,27 @@ done
 if is_sbt_native_packager $BUILD_DIR || is_play $BUILD_DIR; then
   if [ "$KEEP_SBT_CACHE" != "true" ]; then
     if [ "$KEEP_IVY_CACHE" != "true" ] && [ -d $SBT_USER_HOME/.ivy2 ]; then
-      status "Dropping ivy cache from the slug"
+      echo "Dropping ivy cache from the slug..."
       rm -rf $SBT_USER_HOME/.ivy2
     fi
     if [ "$KEEP_COURSIER_CACHE" != "true" ] && [ -d $SBT_USER_HOME/.coursier ]; then
-      status "Dropping coursier cache from the slug"
+      echo "Dropping coursier cache from the slug..."
       rm -rf $SBT_USER_HOME/.coursier
     fi
     if [ -d $SBT_USER_HOME/boot ] ; then
-      status "Dropping sbt boot dir from the slug"
+      echo "Dropping sbt boot dir from the slug..."
       rm -rf $SBT_USER_HOME/boot
     fi
     if [ -d $SBT_USER_HOME/.cache ] ; then
-      status "Dropping sbt cache dir from the slug"
+      echo "Dropping sbt cache dir from the slug..."
       rm -rf $SBT_USER_HOME/.cache
     fi
     if [ -d $BUILD_DIR/project/boot ] ; then
-      status "Dropping project boot dir from the slug"
+      echo "Dropping project boot dir from the slug..."
       rm -rf $BUILD_DIR/project/boot
     fi
     if [ -d $BUILD_DIR/target ] ; then
-      status "Dropping compilation artifacts from the slug"
+      echo "Dropping compilation artifacts from the slug..."
       rm -rf $BUILD_DIR/target/scala-*
       rm -rf $BUILD_DIR/target/streams
       if [ -d $BUILD_DIR/target/resolution-cache ] ; then
