@@ -62,6 +62,11 @@ else
   BUILD_DIR="$APP_BUILD_DIR"
 fi
 
+# Make sure BUILD_DIR points to an existing directory
+# And make sure we're in it:
+export BUILD_DIR
+cd "${BUILD_DIR}"
+
 export_env "$ENV_DIR" "." "JAVA_OPTS"
 
 # Set system properties as env vars
@@ -83,11 +88,12 @@ SBT_CLEAN=$(get_property "$SYSPROPFILE" "sbt.clean" "${SBT_CLEAN:-false}")
 [ -n "$SBT_CLEAN" ] && metrics::set_string "sbt_clean" "$SBT_CLEAN"
 [ -n "${DISABLE_DEPENDENCY_CLASSPATH_LOG:-}" ] && metrics::set_string "disable_dependency_classpath_log" "${DISABLE_DEPENDENCY_CLASSPATH_LOG}"
 
+#create the cache dir if it doesn't exist
+mkdir -p "$CACHE_DIR"
+
 # Install the JDK
 install_jdk "$BUILD_DIR" "$CACHE_DIR"
 
-#create the cache dir if it doesn't exist
-mkdir -p "$CACHE_DIR"
 
 # home directory from perspective of SBT; we rename
 # it because otherwise the project root and $HOME
