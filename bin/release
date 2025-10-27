@@ -9,7 +9,7 @@ BUILD_DIR="${1}"
 
 echo "---"
 
-dependencies_file_path="${BUILD_DIR}/.heroku/sbt-dependency-classpath.log"
+dependencies_file_path="${BUILD_DIR}/.scalingo/sbt-dependency-classpath.log"
 
 if [[ -f "${dependencies_file_path}" ]] && (
 	grep -q "com/impossibl/pgjdbc-ng" "${dependencies_file_path}" ||
@@ -20,7 +20,7 @@ if [[ -f "${dependencies_file_path}" ]] && (
 ); then
 
 	echo "addons:"
-	echo "  - heroku-postgresql"
+	echo "  - scalingo-postgresql:"
 fi
 
 if [[ ! -f "${BUILD_DIR}/Procfile" ]]; then
