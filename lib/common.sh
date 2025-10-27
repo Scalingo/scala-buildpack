@@ -74,6 +74,7 @@ run_sbt() {
 	local tasks="${2}"
 	local build_log_file=".scalingo/sbt-build.log"
 
+	mkdir --parents ".scalingo"
 	echo "" >"${build_log_file}"
 
 	export SBT_EXTRAS_OPTS="${SBT_EXTRAS_OPTS:-}"

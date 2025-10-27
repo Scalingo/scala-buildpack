@@ -39,7 +39,7 @@ function config::get() {
 			Please migrate to using the ${env_var_name} environment variable instead.
 
 			For more information on setting environment variables, see:
-			https://devcenter.heroku.com/articles/config-vars
+			https://doc.scalingo.com/platform/app/environment
 		EOF
 
 		echo "${property_value}"
