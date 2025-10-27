@@ -39,10 +39,6 @@ output::error <<-EOF
 	The Scala buildpack requires a 'build.sbt' or other .sbt file
 	in the root directory of your source code.
 
-	IMPORTANT: If your project uses a different build tool:
-	- For Maven projects, use the heroku/java buildpack instead
-	- For Gradle projects, use the heroku/gradle buildpack instead
-
 	Currently the root directory of your app contains:
 
 	$(ls -1A --indicator-style=slash "${BUILD_DIR}" 2>/dev/null || echo "Unable to list directory contents")
@@ -55,8 +51,8 @@ output::error <<-EOF
 	4. Have been added to the Git repository using 'git add --all'
 	   and then committed using 'git commit'.
 
-	For help with using sbt on Heroku, see:
-	https://devcenter.heroku.com/articles/scala-support
+	For help with using sbt on Scalingo, see:
+	https://doc.scalingo/com/languages/scala/start
 EOF
 
 exit 1

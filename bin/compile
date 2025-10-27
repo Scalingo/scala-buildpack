@@ -178,7 +178,7 @@ else
 fi
 
 # To run any tasks before the actual build, configure the environment
-# $ heroku config:set SBT_PRE_TASKS=flyway:info
+# $ scalingo env-set SBT_PRE_TASKS=flyway:info
 [[ "${SBT_PRE_TASKS}" ]] && SBT_TASKS="${SBT_PRE_TASKS} ${SBT_TASKS}"
 
 # To enable clean compiles, configure the environment to clean:
