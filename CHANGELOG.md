@@ -3,6 +3,16 @@
 ## [Unreleased]
 
 
+## [v103] - 2025-10-27
+
+* Add error for unsupported sbt `2.x` versions. ([#281](https://github.com/heroku/heroku-buildpack-scala/pull/281))
+* Add warning for unsupported sbt `0.x` versions. ([#281](https://github.com/heroku/heroku-buildpack-scala/pull/281))
+* Remove automatic deletion of `project/play-fork-run.sbt` files. Maintainers of legacy apps can consult the PR description for background and how to fix their project in the unlikely case it's necessary. ([#280](https://github.com/heroku/heroku-buildpack-scala/pull/280))
+* Deprecate Scala buildpack configuration via system.properties. A warning is now shown when Scala buildpack configuration properties (like `sbt.clean`, `sbt.project`, etc.) are detected in system.properties. Use environment variables instead. This does not affect `java.runtime.version` which remains supported. ([#279](https://github.com/heroku/heroku-buildpack-scala/pull/279))
+* Remove partial CNB functionality. ([#276](https://github.com/heroku/heroku-buildpack-scala/pull/276))
+* Remove Ivy cache priming feature. ([#275](https://github.com/heroku/heroku-buildpack-scala/pull/275))
+* Improve `bin/detect` error messages when sbt project files are missing. ([#274](https://github.com/heroku/heroku-buildpack-scala/pull/274))
+
 ## [v102] - 2025-10-21
 
 * Fix buildpack not failing when sbt compilation fails. ([#272](https://github.com/heroku/heroku-buildpack-scala/pull/272))
@@ -159,7 +169,8 @@
 *  Upgrade to sbt 0.13.7 launcher
 *  Allow for customized jvm-common package
 
-[unreleased]: https://github.com/heroku/heroku-buildpack-scala/compare/v102...main
+[unreleased]: https://github.com/heroku/heroku-buildpack-scala/compare/v103...main
+[v103]: https://github.com/heroku/heroku-buildpack-scala/compare/v102...v103
 [v102]: https://github.com/heroku/heroku-buildpack-scala/compare/v101...v102
 [v100]: https://github.com/heroku/heroku-buildpack-scala/compare/v99...v100
 [v99]: https://github.com/heroku/heroku-buildpack-scala/compare/v98...v99

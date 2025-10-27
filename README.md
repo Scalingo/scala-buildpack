@@ -5,7 +5,7 @@ It uses [sbt](https://github.com/sbt/sbt) 0.11.0+.
 
 ## How it works
 
-The buildpack will detect your app as Scala if it has a `project/build.properties` file and either a `.sbt` or `.scala` based build config (for example, a `build.sbt` file).  It vendors a version of sbt into your slug (if you are not using sbt-native-packager, it also includes your popluated `.ivy/cache` in the slug).  The `.ivy2` directory will be cached between builds to allow for faster build times.
+The buildpack will detect your app as Scala if it has a `project/build.properties` file and either a `.sbt` or `.scala` based build config (for example, a `build.sbt` file).  It vendors a version of sbt into your slug (if you are not using sbt-native-packager, it also includes your populated `.ivy/cache` in the slug).  The `.ivy2` directory will be cached between builds to allow for faster build times.
 
 It is strongly recommended that you use sbt-native-packager with this buildpack instead of sbt-start-script. The latter is deprecated, and will result in exessively large slug sizes.
 
