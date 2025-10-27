@@ -1,40 +1,34 @@
 #!/usr/bin/env bash
-# bin/release <build-dir>
 
-BP_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && cd .. && pwd)"
-. "$BP_DIR/lib/common.sh"
+set -euo pipefail
 
-BUILD_DIR=$1
+BUILDPACK_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && cd .. && pwd)"
+source "${BUILDPACK_DIR}/lib/common.sh"
 
-cat <<EOF
----
+BUILD_DIR="${1}"
 
-EOF
+echo "---"
 
-dependencies_file_path="${BUILD_DIR}/.heroku/sbt-dependency-classpath.log";
+dependencies_file_path="${BUILD_DIR}/.heroku/sbt-dependency-classpath.log"
 
 if [[ -f "${dependencies_file_path}" ]] && (
-    grep -q "com/impossibl/pgjdbc-ng" "${dependencies_file_path}" ||
-    grep -q "org/postgresql" "${dependencies_file_path}" ||
-    grep -q "skunk-core" "${dependencies_file_path}" ||
-    grep -q "postgresql-async" "${dependencies_file_path}" ||
-    grep -q "quill-ndbc-postgres" "${dependencies_file_path}"
-  ); then
+	grep -q "com/impossibl/pgjdbc-ng" "${dependencies_file_path}" ||
+		grep -q "org/postgresql" "${dependencies_file_path}" ||
+		grep -q "skunk-core" "${dependencies_file_path}" ||
+		grep -q "postgresql-async" "${dependencies_file_path}" ||
+		grep -q "quill-ndbc-postgres" "${dependencies_file_path}"
+); then
 
-cat <<EOF
-addons:
-  - heroku-postgresql
-
-EOF
-
+	echo "addons:"
+	echo "  - heroku-postgresql"
 fi
 
-if [ ! -f "$BUILD_DIR/Procfile" ]; then
-  if uses_universal_packaging "$BUILD_DIR"; then
-    echo "default_process_types:"
-    echo "  $(universal_packaging_default_web_proc "$BUILD_DIR")"
-  elif is_play "$BUILD_DIR"; then
-    echo "default_process_types:"
-    echo "  web: target/start -Dhttp.port=\$PORT \$JAVA_OPTS"
-  fi
+if [[ ! -f "${BUILD_DIR}/Procfile" ]]; then
+	if uses_universal_packaging "${BUILD_DIR}"; then
+		echo "default_process_types:"
+		echo "  $(universal_packaging_default_web_proc "${BUILD_DIR}")"
+	elif is_play "${BUILD_DIR}"; then
+		echo "default_process_types:"
+		echo "  web: target/start -Dhttp.port=\$PORT \$JAVA_OPTS"
+	fi
 fi
