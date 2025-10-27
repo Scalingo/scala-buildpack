@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+set -euo pipefail
+
 # shellcheck disable=SC2034  # Used by sourced scripts
 BUILDPACK_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && cd .. && pwd)"
 
@@ -83,14 +85,14 @@ function metrics::set_string() {
 #
 # Usage:
 # ```
-# start_time=$(nowms)
+# start_time=$(util::nowms)
 # # ... some operation ...
 # metrics::set_duration "compile_duration" "${start_time}"
 # ```
 function metrics::set_duration() {
 	local key="${1}"
 	local start="${2}"
-	local end="${3:-$(nowms)}"
+	local end="${3:-$(util::nowms)}"
 	local time
 	time="$(echo "${start}" "${end}" | awk '{ printf "%.3f", ($2 - $1)/1000 }')"
 	metrics::set_raw "${key}" "${time}"

@@ -1,40 +1,40 @@
 #!/usr/bin/env bash
-# bin/release <build-dir>
 
-BP_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && cd .. && pwd)"
-. "$BP_DIR/lib/common.sh"
+set -euo pipefail
 
-BUILD_DIR=$1
+BUILD_DIR="${1}"
 
-cat <<EOF
----
+echo "---"
 
-EOF
-
-dependencies_file_path="${BUILD_DIR}/.heroku/sbt-dependency-classpath.log";
+dependencies_file_path="${BUILD_DIR}/.scalingo/sbt-dependency-classpath.log"
 
 if [[ -f "${dependencies_file_path}" ]] && (
-    grep -q "com/impossibl/pgjdbc-ng" "${dependencies_file_path}" ||
-    grep -q "org/postgresql" "${dependencies_file_path}" ||
-    grep -q "skunk-core" "${dependencies_file_path}" ||
-    grep -q "postgresql-async" "${dependencies_file_path}" ||
-    grep -q "quill-ndbc-postgres" "${dependencies_file_path}"
-  ); then
+	grep -q "com/impossibl/pgjdbc-ng" "${dependencies_file_path}" ||
+		grep -q "org/postgresql" "${dependencies_file_path}" ||
+		grep -q "skunk-core" "${dependencies_file_path}" ||
+		grep -q "postgresql-async" "${dependencies_file_path}" ||
+		grep -q "quill-ndbc-postgres" "${dependencies_file_path}"
+); then
 
-cat <<EOF
-addons:
-  - heroku-postgresql
-
-EOF
-
+	echo "addons:"
+	echo "  - scalingo-postgresql:"
 fi
 
-if [ ! -f "$BUILD_DIR/Procfile" ]; then
-  if uses_universal_packaging "$BUILD_DIR"; then
-    echo "default_process_types:"
-    echo "  $(universal_packaging_default_web_proc "$BUILD_DIR")"
-  elif is_play "$BUILD_DIR"; then
-    echo "default_process_types:"
-    echo "  web: target/start -Dhttp.port=\$PORT \$JAVA_OPTS"
-  fi
+if [[ ! -f "${BUILD_DIR}/Procfile" ]]; then
+	# Use sbt-native-packager executable if exactly one is found.
+	# https://www.scala-sbt.org/sbt-native-packager/archetypes/java_app/index.html
+	mapfile -t -d '' sbt_native_packager_executables < <(find "${BUILD_DIR}/target/universal/stage/bin" -type f -executable -print0 2>/dev/null)
+	if [[ "${#sbt_native_packager_executables[@]}" -eq 1 ]]; then
+		# Include -Dhttp.port=$PORT since many sbt-native-packager apps use Play Framework.
+		# Apps that don't use the http.port system property will not be negatively affected by setting it.
+		echo "default_process_types:"
+		echo "  web: ${sbt_native_packager_executables[0]#"${BUILD_DIR}/"} -Dhttp.port=\$PORT"
+	elif [[ -f "${BUILD_DIR}/target/start" ]]; then
+		# Legacy support for Play Framework < 2.4.0 (released April 2015).
+		# Kept due to low maintenance cost and usefulness for legacy apps without a Procfile.
+		# Play 2.4.0+ uses sbt-native-packager exclusively.
+		# Note: $JAVA_OPTS included for backwards compatibility with deployments that historically relied on it.
+		echo "default_process_types:"
+		echo "  web: target/start -Dhttp.port=\$PORT \$JAVA_OPTS"
+	fi
 fi

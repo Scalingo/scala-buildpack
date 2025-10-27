@@ -1,45 +1,53 @@
 #!/usr/bin/env bash
 
+set -euo pipefail
+
 handle_sbt_errors() {
-  local log_file="$1"
+	local log_file="${1}"
 
-  local header="Failed to run sbt!"
+	if grep -qi 'Not a valid key: stage' "${log_file}"; then
+		output::error <<-EOF
+			Fail to run sbt!
+			It looks like your build.sbt does not have a valid 'stage' task.
+			Please read our documentation for information on how to create one:
+			https://doc.scalingo.com/languages/scala/start#not-a-valid-command-stage
 
-  local footer="Thanks,
-Scalingo"
+			Thanks,
+			Scalingo
+		EOF
+	elif grep -qi 'is already defined as object' "${log_file}"; then
+		output::error <<-EOF
+			Fail to run sbt!
+			We're sorry this build is failing. It looks like you may need to run a
+			clean build to remove any stale SBT caches. You can do this by setting
+			a configuration variable like this:
 
-  if grep -qi 'Not a valid key: stage' "$log_file"; then
-    error "${header}
-It looks like your build.sbt does not have a valid 'stage' task.
-Please read our Dev Center article for information on how to create one:
-https://doc.scalingo.com/languages/scala/start
-If you continue to have problems, please submit a ticket so we can help:
-https://my.scalingo.com
+				$ scalingo env-set SBT_CLEAN=true
 
-${footer}"
-  elif grep -qi 'is already defined as object' "$log_file"; then
-    error "${header}
-We're sorry this build is failing. It looks like you may need to run a
-clean build to remove any stale SBT caches. You can do this by setting
-a configuration variable like this:
+			Then deploy you application with 'git push' again. If the build succeeds
+			you can remove the variable by running this command
 
-    $ scalingo env-set SBT_CLEAN=true
+				$ scalingo env-unset SBT_CLEAN
 
-Then deploy you application with 'git push' again. If the build succeeds
-you can remove the variable by running this command
+			If this does not resolve the problem, please get in touch with our
+			support team.
 
-    $ scalingo env-unset SBT_CLEAN
+			Thanks,
+			Scalingo
+		EOF
+	else
+		output::error <<-EOF
+			Fail to run sbt!
+			We're sorry this build is failing. If you can't find the issue in
+			application code, please get in touch with our support team.
+	
+			You can also try reverting to the previous version of the buildpack
+			by running:
 
-If this does not resolve the problem, please submit a ticket so we
-can help: https://my.scalingo.com
+				$ scalingo --app my-app env-set BUILDPACK_URL=https://github.com/Scalingo/scala-buildpack#previous-version"
 
-${footer}"
-  else
-    error "${header}
-We're sorry this build is failing. If you can't find the issue in application
-code, please submit a ticket so we can help: https://my.scalingo.com
-${previousVersion}
-
-${footer}"
-  fi
+			Thanks,
+			Scalingo
+		EOF
+	fi
 }
