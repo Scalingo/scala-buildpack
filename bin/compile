@@ -35,10 +35,14 @@ metrics::setup
 
 if is_app_dir "${APP_BUILD_DIR}"; then
 	BUILD_DIR="/tmp/scala_buildpack_build_dir"
-	mv "${APP_BUILD_DIR}" "${BUILD_DIR}"
+	ln --symbolic --force --no-dereference "${APP_BUILD_DIR}" "${BUILD_DIR}"
 else
 	BUILD_DIR="${APP_BUILD_DIR}"
 fi
+
+# Make sure BUILD_DIR points to an existing directory
+# And make sure we're in it:
+cd "${BUILD_DIR}"
 
 # When multiple buildpacks are used, earlier buildpacks may add executables to PATH
 # and GEM_PATH that reference APP_BUILD_DIR. Since we've moved the build directory to
@@ -277,9 +281,9 @@ cat <<-EOF >"${profile_script}"
 	export PATH="\$SBT_HOME/bin:\$PATH"
 EOF
 
-# Move compiled app back to where we expect it:
+# Remove previously created symlink:
 if is_app_dir "${APP_BUILD_DIR}"; then
-	mv "${BUILD_DIR}" "${APP_BUILD_DIR}"
+	rm --force "${BUILD_DIR}"
 fi
 
 # write export script
