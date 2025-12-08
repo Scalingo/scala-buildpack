@@ -8,9 +8,7 @@ echo "---"
 
 dependencies_file_path="${BUILD_DIR}/.scalingo/sbt-dependency-classpath.log"
 
-# Auto-provision Heroku Postgres if PostgreSQL dependencies are detected.
-# Only applicable to accounts created before May 15, 2023 or accounts with auto-provisioning enabled.
-# See: https://devcenter.heroku.com/articles/scala-support#postgres-auto-provisioning
+# Auto-provision Scalingo PostgreSQL addon if PostgreSQL dependencies are detected.
 if [[ -f "${dependencies_file_path}" ]]; then
 	postgresql_dependencies=(
 		"com/impossibl/pgjdbc-ng" # https://impossibl.github.io/pgjdbc-ng/

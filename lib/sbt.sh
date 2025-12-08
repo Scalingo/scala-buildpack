@@ -67,9 +67,7 @@ function sbt::download_sbt_launcher_jar() {
 			https://github.com/sbt/sbt/releases
 
 			If it has, make sure that you are using the latest version
-			of this buildpack, and haven't pinned to an older release:
-			https://devcenter.heroku.com/articles/managing-buildpacks#view-your-buildpacks
-			https://devcenter.heroku.com/articles/managing-buildpacks#classic-buildpacks-references
+			of this buildpack, and haven't pinned to an older release.
 		EOF
 
 		metrics::set_string "failure_reason" "install_sbt::version_unavailable"
@@ -85,9 +83,7 @@ function sbt::download_sbt_launcher_jar() {
 			the network connection or server.
 
 			First, make sure that you are using the latest version
-			of this buildpack, and haven't pinned to an older release:
-			https://devcenter.heroku.com/articles/managing-buildpacks#view-your-buildpacks
-			https://devcenter.heroku.com/articles/managing-buildpacks#classic-buildpacks-references
+			of this buildpack, and haven't pinned to an older release.
 
 			Then try building again to see if the error resolves itself.
 
@@ -137,7 +133,7 @@ function sbt::output_build_error_message() {
 			Error: sbt 'stage' task not found.
 
 			Your build definition does not define a valid 'stage' task, which is required
-			for deployment on Heroku. This task should create a deployment-ready
+			for deployment on Scalingo. This task should create a deployment-ready
 			version of your application.
 
 			The recommended way to add the 'stage' task is to use the sbt-native-packager
@@ -146,7 +142,6 @@ function sbt::output_build_error_message() {
 
 			For more information, see:
 			- https://www.scala-sbt.org/sbt-native-packager/
-			- https://devcenter.heroku.com/articles/scala-support#build-behavior
 		EOF
 
 		metrics::set_string "failure_reason" "sbt_build::stage_task_not_found"
@@ -183,12 +178,12 @@ function sbt::output_build_error_message() {
 
 			To fix this issue, run a clean build by setting:
 
-			    $ heroku config:set SBT_CLEAN=true
+			    $ scalingo --app my-app env-set SBT_CLEAN=true
 
 			Then deploy again with 'git push'. After a successful build, you can
 			remove the variable:
 
-			    $ heroku config:unset SBT_CLEAN
+			    $ scalingo --app my-app env-unset SBT_CLEAN
 		EOF
 
 		metrics::set_string "failure_reason" "sbt_build::stale_cache"
