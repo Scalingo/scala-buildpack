@@ -5,77 +5,55 @@ It uses [sbt](https://github.com/sbt/sbt) 0.11.0+.
 
 ## How it works
 
-The buildpack will detect your app as Scala if it has a `project/build.properties` file and either a `.sbt` or `.scala` based build config (for example, a `build.sbt` file).  It vendors a version of sbt into your slug (if you are not using sbt-native-packager, it also includes your populated `.ivy/cache` in the slug).  The `.ivy2` directory will be cached between builds to allow for faster build times.
+## Table of Contents
 
-It is strongly recommended that you use sbt-native-packager with this buildpack instead of sbt-start-script. The latter is deprecated, and will result in exessively large slug sizes.
+- [Supported sbt Versions](#supported-sbt-versions)
+- [Getting Started](#getting-started)
+- [Application Requirements](#application-requirements)
+- [Configuration](#configuration)
+  - [OpenJDK Version](#openjdk-version)
+  - [sbt Version](#sbt-version)
+  - [Buildpack Configuration](#buildpack-configuration)
+- [Documentation](#documentation)
 
-    $ scalingo create scala-app
 
-    $ git push scalingo master
-    ...
-    -----> Scala app detected
-    -----> Building app with sbt
-    -----> Running: sbt compile stage
+## Supported sbt Versions
 
-The buildpack will detect your app as Scala if it has the project/build.properties and either .sbt or .scala based build config.  It vendors a version of sbt and your popluated .ivy/cache into your container.  The .ivy2 directory will be cached between builds to allow for faster build times.
+This buildpack officially supports sbt `1.x`. Best-effort support is available for apps using sbt `0.13.18`. sbt `2.x` support will be added after its release.
+
+## Getting Started
+
+See the [Getting Started on Scalingo with Scala](https://doc.scalingo.com/languages/scala/scalatra/start) tutorial.
+
+## Application Requirements
+
+Your app requires at least one `.sbt` file and a `project/build.properties` file in the root directory. The `project/build.properties` file must define the `sbt.version` property.
+
+The buildpack uses the `stage` sbt task to build your application. The easiest way to provide this task is with [`sbt-native-packager`](https://github.com/sbt/sbt-native-packager), which includes it by default.
+
+## Configuration
+
+### OpenJDK Version
+
+Specify an OpenJDK version by creating a `system.properties` file in the root of your project directory and setting the `java.runtime.version` property.
+
+### sbt Version
+
+The buildpack uses the `sbt.version` property in your `project/build.properties` file to determine which sbt version to use. Update this property to change the sbt version.
+
+### Buildpack Configuration
+
+Configure the buildpack by setting environment variables:
+
+| Environment Variable | Description | Default |
+|---------------------|-------------|---------|
+| `SBT_TASKS` | sbt tasks to execute | `compile stage` |
+| `SBT_OPTS` | JVM options for sbt execution | (none) |
+| `SBT_CLEAN` | Run `clean` task before build | `false` |
+| `SBT_PROJECT` | For multi-project builds, specifies which project to build | (none) |
+| `SBT_AT_RUNTIME` | Make sbt available at runtime | `true` |
+| `KEEP_SBT_CACHE` | Prevent removal of compilation artifacts from slug | `false` |
 
 ## Documentation
 
-For more information about using Scala and buildpacks on Scalingo, see these articles:
-
-*  [Scalingo's Scala Support](http://doc.scalingo.com/languages/scala)
-
-## Customizing
-
-This buildpack uses [sbt-extras](https://github.com/paulp/sbt-extras) to run sbt.
-In this way, the execution of sbt can be customized either by setting
-the SBT_OPTS config variable, or by creating a `.sbtopts` file in the
-root directory of your project. When passing options to the underlying
-sbt JVM, you must prefix them with `-J`. Thus, setting stack size for
-the compile process would look like this:
-
-```
-$ scalingo env-set SBT_OPTS="-J-Xss4m"
-```
-
-## Running additional tasks before the build
-
-Sometimes, it might be necessary to run additional sbt tasks before a build and deployment (for example, database migrations). Ideally, the tasks should be interdependent such that these tasks run automatically as pre-requisities to `compile stage`, but sometimes this might not be the case. To add any additional tasks, set the environment variable `SBT_PRE_TASKS` to a list of tasks that should be executed. If the following is set:
-
-    SBT_PRE_TASKS=flyway:migrate info
-
-Then, the following command will be run for build:
-
-    sbt flyway:migrate info compile stage
-
-## Clean builds
-
-In some cases, builds need to clean artifacts before compiling. If a clean build is necessary, configure builds to perform clean by setting `SBT_CLEAN=true`:
-
-```sh-session
-$ scalingo env-set SBT_CLEAN=true
-SBT_CLEAN has been set to true.
-```
-
-All subsequent deploys will use the clean task. To remove the clean task, unset `SBT_CLEAN`:
-
-```sh-session
-$ scalingo env-unset SBT_CLEAN
-SBT_CLEAN has been unset.
-```
-
-## Development
-
-To use this buildpack, fork it on Github.  Push up changes to your fork, then create a test app with `--buildpack <your-github-url>` and push to it.
-
-For example, to reduce your container size by not including the .ivy2/cache, you could add the following.
-
-    for DIR in $CACHED_DIRS ; do
-    rm -rf $CACHE_DIR/$DIR
-    mkdir -p $CACHE_DIR/$DIR
-    cp -r $DIR/.  $CACHE_DIR/$DIR
-    # The following 2 lines are what you would add
-    echo "-----> Dropping ivy cache from the container"
-    rm -rf $SBT_USER_HOME/.ivy2
-
-Note: You will need to have your build copy the necessary jars to run your application to a place that will remain included with the container.
+For more information about using Scala on Scalingo, see the [Scala](https://doc.scalingo.com/langagues/scala) documentation.

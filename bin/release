@@ -8,22 +8,31 @@ echo "---"
 
 dependencies_file_path="${BUILD_DIR}/.scalingo/sbt-dependency-classpath.log"
 
-if [[ -f "${dependencies_file_path}" ]] && (
-	grep -q "com/impossibl/pgjdbc-ng" "${dependencies_file_path}" ||
-		grep -q "org/postgresql" "${dependencies_file_path}" ||
-		grep -q "skunk-core" "${dependencies_file_path}" ||
-		grep -q "postgresql-async" "${dependencies_file_path}" ||
-		grep -q "quill-ndbc-postgres" "${dependencies_file_path}"
-); then
+# Auto-provision Scalingo PostgreSQL addon if PostgreSQL dependencies are detected.
+if [[ -f "${dependencies_file_path}" ]]; then
+	postgresql_dependencies=(
+		"com/impossibl/pgjdbc-ng" # https://impossibl.github.io/pgjdbc-ng/
+		"org/postgresql"          # https://jdbc.postgresql.org/
+		"skunk-core"              # https://typelevel.org/skunk/
+		"postgresql-async"        # https://github.com/postgresql-async/postgresql-async
+		"quill-ndbc-postgres"     # https://github.com/zio/zio-quill
+	)
 
-	echo "addons:"
-	echo "  - scalingo-postgresql:"
+	for dependency in "${postgresql_dependencies[@]}"; do
+		if grep -q "${dependency}" "${dependencies_file_path}"; then
+			echo "addons:"
+			echo "  - scalingo-postgresql"
+			break
+		fi
+	done
 fi
 
 if [[ ! -f "${BUILD_DIR}/Procfile" ]]; then
 	# Use sbt-native-packager executable if exactly one is found.
 	# https://www.scala-sbt.org/sbt-native-packager/archetypes/java_app/index.html
-	mapfile -t -d '' sbt_native_packager_executables < <(find "${BUILD_DIR}/target/universal/stage/bin" -type f -executable -print0 2>/dev/null)
+	# Search for executables in both single-project (target/universal/stage/bin) and
+	# multi-project (*/target/universal/stage/bin) locations.
+	mapfile -t -d '' sbt_native_packager_executables < <(find "${BUILD_DIR}" -path "*/target/universal/stage/bin/*" -type f -executable -print0 2>/dev/null)
 	if [[ "${#sbt_native_packager_executables[@]}" -eq 1 ]]; then
 		# Include -Dhttp.port=$PORT since many sbt-native-packager apps use Play Framework.
 		# Apps that don't use the http.port system property will not be negatively affected by setting it.
