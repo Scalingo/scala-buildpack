@@ -3,6 +3,11 @@
 ## [Unreleased]
 
 
+## [v106] - 2026-02-24
+
+* Recognize `javac` compilation errors as compilation errors. ([#311](https://github.com/heroku/heroku-buildpack-scala/pull/311))
+* Changed the S3 URLs used for downloads to use AWS' dual-stack (IPv6 compatible) endpoint. ([#315](https://github.com/heroku/heroku-buildpack-scala/pull/315))
+
 ## [v105] - 2025-12-03
 
 * Sanitize `SBT_OPTS` by removing `-J` prefix from arguments. ([#309](https://github.com/heroku/heroku-buildpack-scala/pull/309))
@@ -186,7 +191,8 @@
 * Upgrade to `sbt` `0.13.7` launcher.
 * Allow for customized jvm-common package.
 
-[unreleased]: https://github.com/heroku/heroku-buildpack-scala/compare/v105...main
+[unreleased]: https://github.com/heroku/heroku-buildpack-scala/compare/v106...main
+[v106]: https://github.com/heroku/heroku-buildpack-scala/compare/v105...v106
 [v105]: https://github.com/heroku/heroku-buildpack-scala/compare/v104...v105
 [v104]: https://github.com/heroku/heroku-buildpack-scala/compare/v103...v104
 [v103]: https://github.com/heroku/heroku-buildpack-scala/compare/v102...v103
