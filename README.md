@@ -19,7 +19,7 @@ It uses [sbt](https://github.com/sbt/sbt) 0.11.0+.
 
 ## Supported sbt Versions
 
-This buildpack officially supports sbt `1.x`. Best-effort support is available for apps using sbt `0.13.18`. sbt `2.x` support will be added after its release.
+This buildpack officially supports sbt `1.x` and `2.x`. Best-effort support is available for apps using sbt `0.13.18`.
 
 ## Getting Started
 
