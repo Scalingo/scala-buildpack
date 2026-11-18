@@ -38,7 +38,7 @@ function sbt::download_sbt_launcher_jar() {
 	if [[ "${sbt_version}" == 0.* ]]; then
 		sbt_launcher_jar_url="https://repo.typesafe.com/typesafe/ivy-releases/org.scala-sbt/sbt-launch/${sbt_version}/sbt-launch.jar"
 	else
-		sbt_launcher_jar_url="https://repo.maven.apache.org/maven2/org/scala-sbt/sbt-launch/${sbt_version}/sbt-launch-${sbt_version}.jar"
+		sbt_launcher_jar_url="https://heroku-buildpacks-jvm.s3.dualstack.us-east-1.amazonaws.com/maven-central/org/scala-sbt/sbt-launch/${sbt_version}/sbt-launch-${sbt_version}.jar"
 	fi
 
 	local http_status_code curl_exit_code=0
@@ -54,7 +54,8 @@ function sbt::download_sbt_launcher_jar() {
 		--output "${destination_path}" \
 		"${sbt_launcher_jar_url}") || curl_exit_code=$?
 
-	if [[ "${http_status_code}" == "404" ]]; then
+	# S3 responds with 403 instead of 404 for missing objects since the bucket doesn't allow public listing.
+	if [[ "${http_status_code}" == "404" || "${http_status_code}" == "403" ]]; then
 		output::error <<-EOF
 			Error: The requested sbt launcher version isn't available.
 
@@ -232,4 +233,32 @@ function sbt::output_build_error_message() {
 	EOF
 
 	metrics::set_string "failure_reason" "sbt_build::unknown"
+}
+
+# Writes a coursier mirror configuration file that points Maven Central at the Google Maven Central mirror.
+# Returns 1 without writing anything if MAVEN_CENTRAL_MIRROR is `false` or the user configured their own
+# coursier mirrors via COURSIER_MIRRORS.
+#
+# This is a temporary workaround for rate limiting by Maven Central.
+#
+# Usage:
+# ```
+# if sbt::write_central_mirror_properties "/tmp/mirror.properties"; then
+#     export COURSIER_MIRRORS="/tmp/mirror.properties"
+# fi
+# ```
+function sbt::write_central_mirror_properties() {
+	local properties_path="${1}"
+
+	if [[ "${MAVEN_CENTRAL_MIRROR:-}" == "false" || -n "${COURSIER_MIRRORS:-}" ]]; then
+		return 1
+	fi
+
+	# sbt uses coursier for both the launcher and dependency resolution, which applies these mirrors to all
+	# matching repositories, including the ones in the project's meta-build. sbt's default Maven Central
+	# repository uses `repo1.maven.org`, but builds can declare `repo.maven.apache.org` explicitly.
+	cat >"${properties_path}" <<-EOF
+		central.from=https://repo1.maven.org/maven2;https://repo.maven.apache.org/maven2
+		central.to=https://maven-central.storage-download.googleapis.com/maven2
+	EOF
 }

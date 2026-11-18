@@ -3,6 +3,14 @@
 ## [Unreleased]
 
 
+## [v109] - 2026-11-13
+
+* Resolve Maven Central artifacts from the Google Maven Central mirror to avoid Maven Central rate limiting. Set `MAVEN_CENTRAL_MIRROR` to `false` to opt out. ([#354](https://github.com/heroku/heroku-buildpack-scala/pull/354))
+
+## [v108] - 2026-11-13
+
+* Download the `sbt` launcher from a Heroku-hosted mirror of Maven Central. ([#352](https://github.com/heroku/heroku-buildpack-scala/pull/352))
+
 ## [v107] - 2026-07-14
 
 * Add `sbt` `2.x` support. ([#331](https://github.com/heroku/heroku-buildpack-scala/pull/331))
@@ -197,7 +205,9 @@
 * Upgrade to `sbt` `0.13.7` launcher.
 * Allow for customized jvm-common package.
 
-[unreleased]: https://github.com/heroku/heroku-buildpack-scala/compare/v107...main
+[unreleased]: https://github.com/heroku/heroku-buildpack-scala/compare/v109...main
+[v109]: https://github.com/heroku/heroku-buildpack-scala/compare/v108...v109
+[v108]: https://github.com/heroku/heroku-buildpack-scala/compare/v107...v108
 [v107]: https://github.com/heroku/heroku-buildpack-scala/compare/v106...v107
 [v106]: https://github.com/heroku/heroku-buildpack-scala/compare/v105...v106
 [v105]: https://github.com/heroku/heroku-buildpack-scala/compare/v104...v105
